@@ -21,12 +21,17 @@ Available built-in functions are:
 
 Available commands are:
  * PRINT ARG1 ; ARG2 ; ...
- * INPUT "TEXT" ; VARIABLE
- * FOR COUNTER = START TO END
- * NEXT COUNTER
- * POKE ADDRESS, VALUE
- * GOTO LABEL
- * GOSUB LABEL
+ * INPUT "TEXT" ; variable
+ * FOR counter = start TO end
+ * NEXT counter
+ * POKE address, value
+ * GOTO label
+ * GOSUB label
  * RETURN
- * REM COMMENT
- * IF CONDITION THEN COMMAND
+ * REM comment
+ * IF condition THEN command
+
+## "as" statement
+```
+value AS STRING/INT
+```
