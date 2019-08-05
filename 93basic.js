@@ -1,47 +1,71 @@
-/*Terminal feature*/
-class $console {
-	constructor(title) {
-		this.el = document.createElement('div');
-		this.el.style.width = '100%';
-		this.el.style.height = '100%';
-		this.el.style.backgroundColor = 'white';
-		this.el.style.border = '2px inset';
-		this.el.style.overflowY = 'auto';
-		this.el.style.overflowX = 'hidden';
-		this.el.style.font = '12px Consolas';
-		
-		$window({title: title}).el.body.appendChild(this.el);
-		
-		this.print = function(text) {
-			this.el.innerText += text.split(' ').join(String.fromCharCode(160)) + '\n';
-			this.el.scrollTop = this.el.scrollHeight;
-		}
-		
-		this.input = function(text, cb, bas) {
-			this.el.innerText += text.split(' ').join(String.fromCharCode(160));
-			this.el.scrollTop = this.el.scrollHeight;
-			var inp = document.createElement('input');
-			inp.style.width = '50%';
-			inp.style.outline = 'none';
-			inp.style.border = 'none';
-			inp.style.height = '12px';
-			inp.style.font = '12px Consolas';
-			var term = this;
-			var calb = cb;
-			inp.onkeydown = function(e) {
-				if(e.keyCode == 13) {
-					term.print(inp.value);
-					calb(inp.value, bas);
+/*If console module not installed*/
+
+if(typeof $console == 'undefined') {
+	class $console {
+		constructor(title) {
+			//Create element and set stile for console
+			this.el = document.createElement('div');
+			this.el.style.width = '100%';
+			this.el.style.height = '100%';
+			this.el.style.backgroundColor = 'white';
+			this.el.style.border = '2px inset';
+			this.el.style.overflowY = 'auto';
+			this.el.style.overflowX = 'hidden';
+			this.el.style.font = '12px Consolas';
+			
+			//Create a window with given title and add el to it.
+			$window({title: title}).el.body.appendChild(this.el);
+			
+			//Print function
+			this.print = function(text, color) {
+				//If color entered, then create a span
+				if(color != undefined) {
+					var s = document.createElement('span');
+					s.style.color = color;
+					s.innerText = text.split(' ').join(String.fromCharCode(160)) + '\n';
+					this.el.appendChild(s);
+				} else {
+					this.el.innerText += text.split(' ').join(String.fromCharCode(160)) + '\n';
 				}
+				//Scroll to bottom of printed text
+				this.el.scrollTop = this.el.scrollHeight;
 			}
-			this.el.appendChild(inp);
-			inp.select();
+			
+			//Input function
+			this.input = function(text, cb, bas) {
+				//print text and create an input field
+				this.el.innerText += text.split(' ').join(String.fromCharCode(160));
+				this.el.scrollTop = this.el.scrollHeight;
+				var inp = document.createElement('input');
+				inp.style.width = '50%';
+				inp.style.outline = 'none';
+				inp.style.border = 'none';
+				inp.style.height = '12px';
+				inp.style.font = '12px Consolas';
+				var term = this;
+				var calb = cb;
+				//When enter clicked, run callback
+				inp.onkeydown = function(e) {
+					if(e.keyCode == 13) {
+						term.print(inp.value);
+						calb(inp.value, bas);
+					}
+				}
+				this.el.appendChild(inp);
+				inp.select();
+			}
 		}
 	}
 }
 
-/*toVal is used for turning strings such as ' 1 + 2 + num : "34" ' to real values, on this example 37*/
-/*Excepted operators: +, -, *, /, %,	Keywords: "str:", "num:", "len:"	Can work with brackets ()*/
+/*Built in functions*/
+var $B93f = {
+	...Math,
+	substr: (s, x, y) => s.substr(x, y),
+	slice: (s, x, y) => s.slice(x, y)
+}
+
+/*Eval expression function*/
 
 function valueof(s, vars) {
 	//remove all spaces except ones inside ""
@@ -182,6 +206,29 @@ function valueof(s, vars) {
 	}
 	if(s.substr(0, 4) == 'num:') {
 		return Number(valueof(s.slice(4), vars));
+	}
+	
+	//Check if it is a function
+	if(s.split('(')[0] in $B93f) {
+		var arg = s.slice(s.split('(')[0].length + 1, s.length - 1) + ',';
+		var args = [];
+		var ar = '';
+		br = 0;
+		for(var i = 0; i < arg.length; i++) {
+			if(arg[i] == '(') {
+				br++;
+			}
+			if(arg[i] == ')') {
+				br--;
+			}
+			if(arg[i] == ',' && br == 0) {
+				args.push(valueof(ar, {}));
+				ar = '';
+			} else {
+				ar += arg[i];
+			}
+		}
+		return $B93f[s.split('(')[0]](...args);
 	}
 	
 	//Return raw value
