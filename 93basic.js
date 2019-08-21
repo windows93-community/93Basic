@@ -2,12 +2,10 @@
 
 /*Built in functions*/
 var $B93f = {
-	...Math,
 	substr: (s, x, y) => s.substr(x, y),
 	slice: (s, x, y) => s.slice(x, y),
 	Array: (...args) => [...args],
 }
-
 /*Eval expression function*/
 
 function valueof(s, vars) {
@@ -152,7 +150,7 @@ function valueof(s, vars) {
 	}
 	
 	//Check if it is a function
-	if(s.split('(')[0] in $B93f) {
+	if(s.split('(')[0] in $B93f || s.split('(')[0] in Math) {
 		var arg = s.slice(s.split('(')[0].length + 1, s.length - 1) + ',';
 		var args = [];
 		var ar = '';
@@ -175,7 +173,8 @@ function valueof(s, vars) {
 		}
 		args.push(valueof(ar, {}));
 		
-		return $B93f[s.split('(')[0]](...args);
+		if(s.split('(')[0] in $B93f) return $B93f[s.split('(')[0]](...args);
+		else return Math[s.split('(')[0]](...args);
 	}
 	
 	//Return raw value
