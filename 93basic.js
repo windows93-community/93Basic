@@ -5,6 +5,7 @@ var $B93f = {
 	substr: (s, x, y) => s.substr(x, y),
 	slice: (s, x, y) => s.slice(x, y),
 	Array: (...args) => [...args],
+	EmptyArray(x) => '0'.repeat(x).split(''),
 }
 /*Eval expression function*/
 
@@ -314,12 +315,9 @@ function $procedure(code){
 				}
 				return ln;
 			},
-			'append': (self, args, ln) => {
-				var var_name = args.split(',')[0];
-				var var_val = toVal(args.slice(var_name.length+1), self.vars);
-				var nls = self.vars[var_name.split(' ').join('')];
-				nls.push(var_val);
-				self.vars[var_name.split(' ').join('')] = nls;
+			'push': (self, args, ln) => {
+				var arg = getArgs(args);
+				self.vars[arg[0]].push(toval(arg[1], self.vars));
 				return ln;
 			},
 			'print': (self, args, ln) => {
