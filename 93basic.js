@@ -198,7 +198,7 @@ function valueof(s, vars) {
 	}
 }
 
-var toVal = valueof;
+var valueof = valueof;
 var condition = valueof;
 
 /*getArgs seperates arguments using commas but not if they're under quotations,
@@ -263,7 +263,7 @@ function $procedure(code){
 			'var': (self, args, ln) => {
 				var var_name = args.split('=')[0];
 				if(args.slice(var_name.length+1).split(' ').join('')[0] != '['){
-					var var_val = toVal(args.slice(var_name.length+1), self.vars);
+					var var_val = valueof(args.slice(var_name.length+1), self.vars);
 				}
 				var raw_val = args.slice(var_name.length+1);
 				if(var_name.split('[').join('') == var_name){
@@ -293,7 +293,7 @@ function $procedure(code){
 								val_list[val_list.length-1] += '"';
 							}else{
 								if(!quots && raw_val[i] == ','){
-									val_list[val_list.length-1] = toVal(val_list[val_list.length-1], self.vars);
+									val_list[val_list.length-1] = valueof(val_list[val_list.length-1], self.vars);
 									val_list.push('');
 								}else{
 									if(quots || (raw_val[i] != '[' && raw_val[i] != ']')){
@@ -302,14 +302,14 @@ function $procedure(code){
 								}
 							}
 						}
-						//val_list[val_list.length-1] = toVal(val_list[val_list.length-1], self.vars);
+						//val_list[val_list.length-1] = valueof(val_list[val_list.length-1], self.vars);
 						if(raw_val.split(' ').join('') == '[]') {
 							val_list = [];
 						}
 						self.vars[var_name.split(' ').join('')] = val_list;
 					}
 				}else{
-					var place = toVal(var_name.split('[')[1].split(']')[0], self.vars);
+					var place = valueof(var_name.split('[')[1].split(']')[0], self.vars);
 					var_name = var_name.split(' ').join('').split('[')[0]; 
 					self.vars[var_name] = self.vars[var_name].slice(0, place) + var_val + self.vars[var_name].slice(place+1);
 				}
@@ -317,7 +317,7 @@ function $procedure(code){
 			},
 			'push': (self, args, ln) => {
 				var arg = getArgs(args);
-				self.vars[arg[0]].push(toval(arg[1], self.vars));
+				self.vars[arg[0]].push(valueof(arg[1], self.vars));
 				return ln;
 			},
 			'print': (self, args, ln) => {
@@ -327,7 +327,7 @@ function $procedure(code){
 				args = getArgs(args);
 				var text = "";
 				for(i in args){
-					text += toVal(args[i], self.vars);
+					text += valueof(args[i], self.vars);
 				}
 				self.term.print(text);
 				return ln;
@@ -336,7 +336,7 @@ function $procedure(code){
 				args = getArgs(args);
 				var text = "";
 				for(i in args){
-					text += toVal(args[i], self.vars);
+					text += valueof(args[i], self.vars);
 				}
 				$alert(text, function() {
 					self.run(ln+1);
@@ -346,7 +346,7 @@ function $procedure(code){
 			'sleep': (self, args, ln) => {
 				setTimeout(() => {
 					self.run(ln+1);
-				}, toVal(args, self.vars));
+				}, valueof(args, self.vars));
 				/*To stop executing code from this point*/
 				return self.code.length;
 			},
@@ -364,7 +364,7 @@ function $procedure(code){
 					self.term = new $console('V2 Basic'); 
 				}
 				var var_name = args.split(',')[0];
-				var display_str = toVal(args.slice(var_name.length+1), self.vars);
+				var display_str = valueof(args.slice(var_name.length+1), self.vars);
 				self.term.input(display_str, (input) => {
 					if(var_name.split('[').join('') == var_name){
 						self.vars[var_name.split(' ').join('')] = input;
@@ -384,7 +384,7 @@ function $procedure(code){
 			},
 			"prompt": (self, args, ln) => {
 				var var_name = args.split(',')[0];
-				var display_str = toVal(args.slice(var_name.length+1), self.vars);
+				var display_str = valueof(args.slice(var_name.length+1), self.vars);
 				$prompt(display_str, (a, input) => {
 					if(var_name.split('[').join('') == var_name){
 						self.vars[var_name.split(' ').join('')] = input;
@@ -406,7 +406,7 @@ function $procedure(code){
 			},
 			"confirm": (self, args, ln) => {
 				var var_name = args.split(',')[0];
-				var display_str = toVal(args.slice(var_name.length+1), self.vars);
+				var display_str = valueof(args.slice(var_name.length+1), self.vars);
 				$confirm(display_str, (input) => {
 					if(var_name.split('[').join('') == var_name){
 						self.vars[var_name.split(' ').join('')] = input;
@@ -546,8 +546,8 @@ function $procedure(code){
 			/*Syntax: for i = 0 to 10 do*/
 			"for": (self, args, ln) => {
 				var var_name = args.split('=')[0].split(' ').join('');
-				var start_val = toVal(args.split('=')[1].split('to')[0], self.vars);
-				var end_val = toVal(args.split('to')[1].split('do')[0], self.vars);
+				var start_val = valueof(args.split('=')[1].split('to')[0], self.vars);
+				var end_val = valueof(args.split('to')[1].split('do')[0], self.vars);
 				/*Find end of loop*/
 				var endloop = 0;
 				/*br counts number of opened then-end or do-end structures*/
@@ -599,7 +599,7 @@ function $procedure(code){
 			/*PATH: musn't have /a/ at the start*/
 			'load': (self, args, ln) => {
 				var var_name = args.split(',')[0];
-				var display_str = toVal(args.slice(var_name.length+1), self.vars);
+				var display_str = valueof(args.slice(var_name.length+1), self.vars);
 				$db.getRaw(display_str, (a, input) => {
 					if(input == null) {
 						input = $store.getRaw(display_str);
