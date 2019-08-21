@@ -5,7 +5,7 @@ var $B93f = {
 	substr: (s, x, y) => s.substr(x, y),
 	slice: (s, x, y) => s.slice(x, y),
 	Array: (...args) => [...args],
-	EmptyArray(x) => '0'.repeat(x).split(''),
+	EmptyArray: (x) => '0'.repeat(x).split(''),
 }
 /*Eval expression function*/
 
