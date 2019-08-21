@@ -1,68 +1,11 @@
-/*If console module not installed*/
-
-if(typeof $console == 'undefined') {
-	class $console {
-		constructor(title) {
-			//Create element and set stile for console
-			this.el = document.createElement('div');
-			this.el.style.width = '100%';
-			this.el.style.height = '100%';
-			this.el.style.backgroundColor = 'white';
-			this.el.style.border = '2px inset';
-			this.el.style.overflowY = 'auto';
-			this.el.style.overflowX = 'hidden';
-			this.el.style.font = '12px Consolas';
-			
-			//Create a window with given title and add el to it.
-			$window({title: title}).el.body.appendChild(this.el);
-			
-			//Print function
-			this.print = function(text, color) {
-				//If color entered, then create a span
-				if(color != undefined) {
-					var s = document.createElement('span');
-					s.style.color = color;
-					s.innerText = text.split(' ').join(String.fromCharCode(160)) + '\n';
-					this.el.appendChild(s);
-				} else {
-					this.el.innerText += text.split(' ').join(String.fromCharCode(160)) + '\n';
-				}
-				//Scroll to bottom of printed text
-				this.el.scrollTop = this.el.scrollHeight;
-			}
-			
-			//Input function
-			this.input = function(text, cb, bas) {
-				//print text and create an input field
-				this.el.innerText += text.split(' ').join(String.fromCharCode(160));
-				this.el.scrollTop = this.el.scrollHeight;
-				var inp = document.createElement('input');
-				inp.style.width = '50%';
-				inp.style.outline = 'none';
-				inp.style.border = 'none';
-				inp.style.height = '12px';
-				inp.style.font = '12px Consolas';
-				var term = this;
-				var calb = cb;
-				//When enter clicked, run callback
-				inp.onkeydown = function(e) {
-					if(e.keyCode == 13) {
-						term.print(inp.value);
-						calb(inp.value, bas);
-					}
-				}
-				this.el.appendChild(inp);
-				inp.select();
-			}
-		}
-	}
-}
+/*Note: this library requires console.js, available at github Windows 93 community / DOM42 repository*/
 
 /*Built in functions*/
 var $B93f = {
 	...Math,
 	substr: (s, x, y) => s.substr(x, y),
-	slice: (s, x, y) => s.slice(x, y)
+	slice: (s, x, y) => s.slice(x, y),
+	Array: (...args) => [...args],
 }
 
 /*Eval expression function*/
@@ -217,9 +160,11 @@ function valueof(s, vars) {
 		for(var i = 0; i < arg.length; i++) {
 			if(arg[i] == '(') {
 				br++;
+				ar += arg[i];
 			}
 			if(arg[i] == ')') {
 				br--;
+				ar += arg[i];
 			}
 			if(arg[i] == ',' && br == 0) {
 				args.push(valueof(ar, {}));
@@ -228,6 +173,8 @@ function valueof(s, vars) {
 				ar += arg[i];
 			}
 		}
+		args.push(valueof(ar, {}));
+		
 		return $B93f[s.split('(')[0]](...args);
 	}
 	
@@ -259,11 +206,18 @@ var condition = valueof;
 function getArgs(raw_args){
 	let quots = false;
 	var args = [''];
+	var br = 0;
 	for(let i = 0; i < raw_args.length; i++){
 		if(raw_args[i] == '"'){
 			quots = !quots;
 			args[args.length-1] += raw_args[i];
-		}else if(raw_args[i] == ',' && !quots){
+		} else if(raw_args[i] == '(') {
+			br++;
+			args[args.length-1] += raw_args[i];
+		} else if(raw_args[i] == ')') {
+			br--;
+			args[args.length-1] += raw_args[i];
+		}else if(raw_args[i] == ',' && !quots && br == 0){
 			args.push('');
 		}else{
 			args[args.length-1] += raw_args[i];
