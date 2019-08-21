@@ -172,7 +172,6 @@ function valueof(s, vars) {
 				ar += arg[i];
 			}
 		}
-		args.push(valueof(ar, {}));
 		
 		if(s.split('(')[0] in $B93f) return $B93f[s.split('(')[0]](...args);
 		else return Math[s.split('(')[0]](...args);
